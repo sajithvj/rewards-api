@@ -96,7 +96,7 @@ class RewardServiceTest {
         }
     }
     @Test
-    void summary_areReturnedForSingleCustomerInRepository() throws ExecutionException, InterruptedException {
+    void summary_areReturnedForSingleCustomerInRepository() {
 
         var summary=  rewardService.getRewardSummaryByCustomerId("C001",1);
 

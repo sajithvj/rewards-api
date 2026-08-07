@@ -84,7 +84,8 @@ public class RewardService {
      */
     public CustomerRewardSummary getRewardSummaryByCustomerId(String customerId, Integer months) {
         if(months == null || months <= 0|| customerId == null || customerId.isEmpty()) {
-            throw new IllegalArgumentException("Months parameter must be a positive integer.");
+            log.error("Invalid input parameters: customerId={}, months={}", customerId, months);
+            throw new IllegalArgumentException("Invalid input parameters: customerId and months must be provided and valid.");
         }
         LocalDate startDate = LocalDate.now().minusMonths(months);
         LocalDate endDate = LocalDate.now();
