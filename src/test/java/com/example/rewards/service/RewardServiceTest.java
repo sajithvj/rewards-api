@@ -1,7 +1,6 @@
 package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
-import com.example.rewards.exception.AppException;
 import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
