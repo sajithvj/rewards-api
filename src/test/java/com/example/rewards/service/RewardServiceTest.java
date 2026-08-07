@@ -2,6 +2,7 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.exception.AppException;
+import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 
@@ -97,14 +98,24 @@ class RewardServiceTest {
     @Test
     void summary_areReturnedForSingleCustomerInRepository() throws ExecutionException, InterruptedException {
 
-        var summary=  rewardService.getRewardSummaryByCustomerId("C001");
+        var summary=  rewardService.getRewardSummaryByCustomerId("C001",1);
 
         assertThat(summary.getCustomerId()).isEqualTo("C001");
         assertThat(summary.getCustomerName()).isEqualTo("Alice Job");
-        assertThat(summary.getTotalPoints()).isEqualTo(440);
+        assertThat(summary.getTotalPoints()).isNotZero();
     }
     @Test
+    void summary_illegalArgumentExceptionNullCustomerId() {
+        assertThrows(IllegalArgumentException.class, () -> rewardService.getRewardSummaryByCustomerId(null,1));
+    }
+
+    @Test
+    void summary_illegalArgumentExceptionZeroMonth() {
+        assertThrows(IllegalArgumentException.class, () -> rewardService.getRewardSummaryByCustomerId("C001",0));
+    }
+
+    @Test
     void summary_notFoundForNonExistentCustomerId() {
-        assertThrows(AppException.class, () -> rewardService.getRewardSummaryByCustomerId("C999"));
+        assertThrows(CustomerNotFoundException.class, () -> rewardService.getRewardSummaryByCustomerId("C999",2));
     }
 }

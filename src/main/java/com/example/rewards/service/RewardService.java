@@ -2,14 +2,16 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.dto.MonthlyReward;
-import com.example.rewards.exception.AppException;
+import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.model.Transaction;
 import com.example.rewards.repository.TransactionRepository;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class RewardService {
-
+    private static final Logger log = LoggerFactory.getLogger(RewardService.class);
     private static final BigDecimal TIER_2_THRESHOLD = new BigDecimal("100");
     private static final BigDecimal TIER_1_THRESHOLD = new BigDecimal("50");
 
@@ -80,13 +82,16 @@ public class RewardService {
      * Builds  summary of reward points per customer, broken down by
      * calendar month, plus the total across all months on record.
      */
-    public CustomerRewardSummary getRewardSummaryByCustomerId(String customerId) {
-        List<Transaction> customerTransactions = transactionRepository.findAll().stream()
-                .filter(t -> t.customerId().equals(customerId))
-                .collect(Collectors.toList());
+    public CustomerRewardSummary getRewardSummaryByCustomerId(String customerId, Integer months) {
+        if(months == null || months <= 0|| customerId == null || customerId.isEmpty()) {
+            throw new IllegalArgumentException("Months parameter must be a positive integer.");
+        }
+        LocalDate startDate = LocalDate.now().minusMonths(months);
+        LocalDate endDate = LocalDate.now();
+        List<Transaction> customerTransactions = transactionRepository.findByCustomerIdAndTransactionDateBetween(customerId, startDate, endDate);
 
         if (customerTransactions.isEmpty()) {
-            throw new AppException("Customer not found", HttpStatus.NOT_FOUND); // or throw an exception, depending on your design choice
+            throw new CustomerNotFoundException(customerId); // or throw an exception, depending on your design choice
         }
 
         return buildSummary(customerId, customerTransactions);
@@ -104,6 +109,7 @@ public class RewardService {
             pointsByMonth.merge(month, points, Integer::sum);
             transactionByMonth.computeIfAbsent(month, k -> new java.util.ArrayList<>()).add(t.transactionId());
         }
+
 
         List<MonthlyReward> monthlyRewards = pointsByMonth.entrySet().stream()
                 .map(e -> new MonthlyReward(e.getKey(), e.getValue(), transactionByMonth.get(e.getKey())))

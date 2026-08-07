@@ -31,4 +31,12 @@ public class GlobalExceptionHandler {
 
 
     }
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerNotFoundException(CustomerNotFoundException ex, WebRequest req) {
+        List<String> details = new ArrayList<>();
+        details.add(ex.getLocalizedMessage());
+        ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
+                404, LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 }
