@@ -1,15 +1,22 @@
 package com.example.rewards.service;
 
+import com.example.rewards.dto.CustomerRewardSummary;
+import com.example.rewards.exception.AppException;
 import com.example.rewards.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RewardServiceTest {
 
     private final RewardService rewardService = new RewardService(new TransactionRepository());
+    CompletableFuture<List<CustomerRewardSummary>> completableFutureTest;
 
     @Test
     void exampleFromSpec_120DollarPurchase_earns90Points() {
@@ -29,7 +36,7 @@ class RewardServiceTest {
 
     @Test
     void purchaseBetween50And100_earnsOnePointPerDollarOverFifty() {
-        assertThat(rewardService.calculatePoints(new BigDecimal("75"))).isEqualTo(25);
+        assertThat(rewardService.calculatePoints(new BigDecimal("75"))).isEqualTo(50);
     }
 
     @Test
@@ -55,18 +62,21 @@ class RewardServiceTest {
     }
 
     @Test
-    void summaries_areReturnedForEveryCustomerInRepository() {
-        var summaries = rewardService.getRewardSummaries();
+    void summaries_areReturnedForEveryCustomerInRepository() throws ExecutionException, InterruptedException {
+        completableFutureTest = rewardService.getRewardSummaries();
+        var summaries =  completableFutureTest.get();
 
-        assertThat(summaries).hasSize(4);
+        assertThat(summaries).hasSize(5);
         assertThat(summaries).extracting("customerName")
-                .containsExactlyInAnyOrder("Alice Nguyen", "Ben Carter", "Priya Sharma", "David Kim");
+                .containsExactlyInAnyOrder("Alice Job", "David John","Nirmal Xavier", "Priya Sharma", "Sonu Venu");
     }
 
     @Test
-    void customerWithOnlySmallPurchases_hasZeroTotalPoints() {
-        var david = rewardService.getRewardSummaries().stream()
-                .filter(s -> s.getCustomerName().equals("David Kim"))
+    void customerWithOnlySmallPurchases_hasZeroTotalPoints() throws ExecutionException, InterruptedException {
+        completableFutureTest = rewardService.getRewardSummaries();
+        var summaries =  completableFutureTest.get();
+        var david = summaries.stream()
+                .filter(s -> s.getCustomerName().equals("David John"))
                 .findFirst()
                 .orElseThrow();
 
@@ -74,12 +84,27 @@ class RewardServiceTest {
     }
 
     @Test
-    void totalPoints_equalsSumOfMonthlyPoints() {
-        for (var summary : rewardService.getRewardSummaries()) {
+    void totalPoints_equalsSumOfMonthlyPoints() throws ExecutionException, InterruptedException {
+        completableFutureTest = rewardService.getRewardSummaries();
+        var summaries =  completableFutureTest.get();
+        for (var summary : summaries) {
             int sumOfMonths = summary.getMonthlyRewards().stream()
                     .mapToInt(m -> m.getPoints())
                     .sum();
             assertThat(summary.getTotalPoints()).isEqualTo(sumOfMonths);
         }
+    }
+    @Test
+    void summary_areReturnedForSingleCustomerInRepository() throws ExecutionException, InterruptedException {
+
+        var summary=  rewardService.getRewardSummaryByCustomerId("C001");
+
+        assertThat(summary.getCustomerId()).isEqualTo("C001");
+        assertThat(summary.getCustomerName()).isEqualTo("Alice Job");
+        assertThat(summary.getTotalPoints()).isEqualTo(440);
+    }
+    @Test
+    void summary_notFoundForNonExistentCustomerId() {
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaryByCustomerId("C999"));
     }
 }

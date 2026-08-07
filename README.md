@@ -17,7 +17,7 @@ mvn spring-boot:run
 Then:
 
 ```bash
-curl http://localhost:8080/api/rewards
+curl http://localhost:8085/api/rewards
 ```
 
 Returns each customer's points broken down by month, plus a running total:
