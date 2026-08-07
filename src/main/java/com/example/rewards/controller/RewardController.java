@@ -51,7 +51,7 @@ public class RewardController {
      * month plus the total across the whole period.
      */
     @GetMapping("/{customerId}/rewards")
-    public ResponseEntity<CustomerRewardSummary> getRewardsByCustomerId(@PathVariable(value = "customerId") String customerId, @RequestParam(value = "month", defaultValue = "3") Integer months) {
+    public ResponseEntity<CustomerRewardSummary> getRewardsByCustomerId(@PathVariable(value = "customerId") String customerId, @RequestParam(value = "months", defaultValue = "3") Integer months) {
         return new ResponseEntity<>(rewardService.getRewardSummaryByCustomerId(customerId,months), HttpStatus.OK);
     }
 
