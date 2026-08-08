@@ -124,6 +124,17 @@ Returns a single customer's points for the last 6 months, plus a running total:
 ```bash
 mvn test
 ```
+...
+## Health check
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+## Prometheus metrics
+
+```bash
+curl http://localhost:8080/actuator/prometheus
+```
 
 Covers the points formula at each tier boundary ($50, $100), the worked
 example from the spec ($120 → 90 pts), a customer who never crosses $50
