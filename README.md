@@ -322,8 +322,12 @@ Returns an error because the start date is after the end date:
 ```bash
 mvn test
 ```
-``screnshot
+``screnshots
 ![img_1.png](img_1.png)
+
+![img.png](img.png)
+
+![img_2.png](img_2.png)
 ...
 ## Health check
 
