@@ -282,27 +282,191 @@ Returns each customer's points broken down by month, plus a running total: for t
 ]
 ```
 ```bash
-curl localhost:8080/v1/calculateRewards?startDate=2026-05-09
+curl localhost:8080/v1/calculateRewards?startDate=2026-06-09
 ```
-Returns an error because the end date is missing:
+Returns each customer's points broken down by month, plus a running total: with startDate 2026-06-09 and endDate will taken as cuurentDate
+
 
 ```json
+[
+  {
+    "customerId": "C001",
+    "customerName": "Alice Job",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 50,
+        "transactionIds": [
+          "T0005"
+        ]
+      }
+    ],
+    "totalPoints": 50
+  },
+  {
+    "customerId": "C005",
+    "customerName": "Nirmal Xavier",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 10,
+        "transactionIds": [
+          "T00014"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "AUGUST",
+        "points": 2,
+        "transactionIds": [
+          "T00015"
+        ]
+      }
+    ],
+    "totalPoints": 12
+  },
+  {
+    "customerId": "C003",
+    "customerName": "Priya Sharma",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 210,
+        "transactionIds": [
+          "T00010"
+        ]
+      }
+    ],
+    "totalPoints": 210
+  }
+]
+```
+If the startDate greater than 3 months will return error message
+``` json
 {
-  "details": "Both start date and end date must be provided together or both must be null.",
-  "statusCode": 400,
-  "timestamp": "2026-08-12T22:22:47.8882322"
+    "details": "Date range cannot exceed three months.",
+    "statusCode": 400,
+    "timestamp": "2026-08-13T02:07:32.8967217"
 }
 ```
 ```bash
 curl localhost:8080/v1/calculateRewards?endDate=2026-08-07
 ````
-Returns an error because the end date is missing:
+Returns each customer's points broken down by month, plus a running total: with endDate 2026-08-07 and startDate will calculated with endDate provided.
 ```json
-{
-  "details": "Both start date and end date must be provided together or both must be null.",
-  "statusCode": 400,
-  "timestamp": "2026-08-12T22:22:47.8882322"
-}
+[
+  {
+    "customerId": "C001",
+    "customerName": "Alice Job",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "MAY",
+        "points": 26,
+        "transactionIds": [
+          "T0002"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 250,
+        "transactionIds": [
+          "T0003",
+          "T0004"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 50,
+        "transactionIds": [
+          "T0005"
+        ]
+      }
+    ],
+    "totalPoints": 326
+  },
+  {
+    "customerId": "C004",
+    "customerName": "David John",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 0,
+        "transactionIds": [
+          "T00012"
+        ]
+      }
+    ],
+    "totalPoints": 0
+  },
+  {
+    "customerId": "C005",
+    "customerName": "Nirmal Xavier",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 90,
+        "transactionIds": [
+          "T00013"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 10,
+        "transactionIds": [
+          "T00014"
+        ]
+      }
+    ],
+    "totalPoints": 100
+  },
+  {
+    "customerId": "C003",
+    "customerName": "Priya Sharma",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 370,
+        "transactionIds": [
+          "T0009"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 210,
+        "transactionIds": [
+          "T00010"
+        ]
+      }
+    ],
+    "totalPoints": 580
+  },
+  {
+    "customerId": "C002",
+    "customerName": "Sonu Venu",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 151,
+        "transactionIds": [
+          "T0007"
+        ]
+      }
+    ],
+    "totalPoints": 151
+  }
+]
 ```
 ```bash
 curl localhost:8080/v1/calculateRewards?startDate=2026-08-09&endDate=2026-05-07
@@ -328,6 +492,12 @@ mvn test
 ![img.png](img.png)
 
 ![img_2.png](img_2.png)
+
+![img_3.png](img_3.png)
+
+![img_4.png](img_4.png)
+
+![img_5.png](img_5.png)
 ...
 ## Health check
 
