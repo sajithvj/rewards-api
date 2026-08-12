@@ -9,7 +9,6 @@ import java.util.List;
 public record MonthlyReward(int year, String month, int points, List<String> transactionIds) {
 
 
-
     public MonthlyReward(int year, String month, int points, List<String> transactionIds) {
 
         this.month = month;

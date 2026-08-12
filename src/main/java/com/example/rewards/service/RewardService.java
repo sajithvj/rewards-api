@@ -9,7 +9,6 @@ import com.example.rewards.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,8 +56,7 @@ public class RewardService {
         }
 
         if (remaining.compareTo(TIER_1_THRESHOLD) > 0) {
-
-            BigDecimal fiftyToHundred =  remaining.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
+            BigDecimal fiftyToHundred = remaining.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
             points = points.add(fiftyToHundred);
         }
 
@@ -72,7 +69,7 @@ public class RewardService {
      */
 
     public List<CustomerRewardSummary> getRewardSummaries(LocalDate startDate, LocalDate endDate) {
-
+        validateDateRange(startDate, endDate);
         Map<String, List<Transaction>> byCustomer = transactionRepository.findByTransactionDateBetween(startDate, endDate).stream()
                 .collect(Collectors.groupingBy(Transaction::customerId));
         List<CustomerRewardSummary> summaries = byCustomer.entrySet().stream()
@@ -81,30 +78,11 @@ public class RewardService {
                 .collect(Collectors.toList());
         if (summaries.isEmpty()) {
             log.warn("No transactions found between {} and {}", startDate, endDate);
-            throw new AppException("No transactions found in the specified date range.", HttpStatus.NOT_FOUND);
+            throw new CustomerNotFoundException(startDate,endDate);
         }
         return summaries;
     }
 
-    /**
-     * Builds  summary of reward points per customer, broken down by
-     * calendar month, plus the total across all months on record.
-     */
-    public CustomerRewardSummary getRewardSummaryByCustomerId(String customerId, Integer months) {
-        if(months == null || months <= 0|| customerId == null || customerId.isEmpty()) {
-            log.error("Invalid input parameters: customerId={}, months={}", customerId, months);
-            throw new IllegalArgumentException("Invalid input parameters: customerId and months must be provided and valid.");
-        }
-        LocalDate startDate = LocalDate.now().minusMonths(months);
-        LocalDate endDate = LocalDate.now();
-        List<Transaction> customerTransactions = transactionRepository.findByCustomerIdAndTransactionDateBetween(customerId, startDate, endDate);
-
-        if (customerTransactions.isEmpty()) {
-            throw new CustomerNotFoundException(customerId); // or throw an exception, depending on your design choice
-        }
-
-        return buildSummary(customerId, customerTransactions);
-    }
 
     private CustomerRewardSummary buildSummary(String customerId, List<Transaction> customerTransactions) {
         String customerName = customerTransactions.get(0).customerName();
@@ -121,11 +99,47 @@ public class RewardService {
 
 
         List<MonthlyReward> monthlyRewards = pointsByMonth.entrySet().stream()
-                .map(e -> new MonthlyReward(e.getKey().getYear(),e.getKey().getMonth().name(), e.getValue(), transactionByMonth.get(e.getKey())))
+                .map(e -> new MonthlyReward(e.getKey().getYear(), e.getKey().getMonth().name(), e.getValue(), transactionByMonth.get(e.getKey())))
                 .collect(Collectors.toList());
 
         int totalPoints = monthlyRewards.stream().mapToInt(MonthlyReward::points).sum();
 
         return new CustomerRewardSummary(customerId, customerName, monthlyRewards, totalPoints);
     }
+
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        // 1. Check for mutual presence/absence
+        if ((startDate == null) != (endDate == null)) {
+            log.error("Exclusive null dates provided: startDate={}, endDate={}", startDate, endDate);
+            throw new AppException("Both start date and end date must be provided together or both must be null.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 2. Early exit if both are null (valid state)
+        if (startDate == null && endDate == null) {
+            log.error("Both startDate and endDate are null, which is not allowed.");
+            throw new AppException("Both start date and end date cannot be null.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 3. Chronological order check
+        if (startDate.isAfter(endDate)) {
+            log.error("Invalid sequence: startDate {} is after endDate {}", startDate, endDate);
+            throw new AppException("Start date must be before or equal to end date.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        // 4. One-year historical limit check (cache LocalDate.now() execution)
+        LocalDate minAllowedStartDate = LocalDate.now().minusYears(1);
+        if (startDate.isBefore(minAllowedStartDate)) {
+            log.error("Start date {} exceeds 1-year historical limit.", startDate);
+            throw new AppException("Start date cannot be more than one year in the past.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 5. Maximum range window check (exact 3-month bound evaluation)
+        if (startDate.plusMonths(3).isBefore(endDate)) {
+            log.error("Date span exceeds 3 months: startDate={}, endDate={}", startDate, endDate);
+            throw new AppException("Date range cannot exceed three months.", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
 }

@@ -42,16 +42,9 @@ public class TransactionRepository {
 
     );
 
-    public List<Transaction> findAll() {
-        return transactions;
-    }
 
-    public List<Transaction> findByCustomerIdAndTransactionDateBetween(String customerId, LocalDate startDate, LocalDate endDate) {
-        return transactions.stream()
-                .filter(t -> t.customerId().equals(customerId))
-                .filter(t -> !t.transactionDate().isBefore(startDate) && !t.transactionDate().isAfter(endDate))
-                .toList();
-    }
+
+
     public List<Transaction> findByTransactionDateBetween(LocalDate startDate, LocalDate endDate) {
         return transactions.stream()
                 .filter(t -> !t.transactionDate().isBefore(startDate) && !t.transactionDate().isAfter(endDate))

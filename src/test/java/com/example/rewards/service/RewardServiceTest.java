@@ -1,18 +1,22 @@
 package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
+import com.example.rewards.dto.MonthlyReward;
+import com.example.rewards.exception.AppException;
 import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
+@SpringBootTest
 class RewardServiceTest {
 
     private final RewardService rewardService = new RewardService(new TransactionRepository());
@@ -36,7 +40,7 @@ class RewardServiceTest {
 
     @Test
     void purchaseBetween50And100_earnsOnePointPerDollarOverFifty() {
-        assertThat(rewardService.calculatePoints(new BigDecimal("75"))).isEqualTo(50);
+        assertThat(rewardService.calculatePoints(new BigDecimal("75"))).isEqualTo(25);
     }
 
     @Test
@@ -45,8 +49,13 @@ class RewardServiceTest {
     }
 
     @Test
+    void purchaseLittleGreater100Dollars_earns51Points() {
+        assertThat(rewardService.calculatePoints(new BigDecimal("100.5"))).isEqualTo(51);
+    }
+
+    @Test
     void purchaseOver100Dollars_earnsTwoPointsPerDollarOverHundredPlusFiftyBase() {
-        // $310 -> 2x$210 + 1x$50 = 420 + 50 = 470
+
         assertThat(rewardService.calculatePoints(new BigDecimal("310"))).isEqualTo(470);
     }
 
@@ -61,60 +70,73 @@ class RewardServiceTest {
         assertThat(rewardService.calculatePoints(null)).isEqualTo(0);
     }
 
-//    @Test
-//    void summaries_areReturnedForEveryCustomerInRepository() throws ExecutionException, InterruptedException {
-//        completableFutureTest = rewardService.getRewardSummaries();
-//        var summaries =  completableFutureTest.get();
-//
-//        assertThat(summaries).hasSize(5);
-//        assertThat(summaries).extracting("customerName")
-//                .containsExactlyInAnyOrder("Alice Job", "David John","Nirmal Xavier", "Priya Sharma", "Sonu Venu");
-//    }
-//
-//    @Test
-//    void customerWithOnlySmallPurchases_hasZeroTotalPoints() throws ExecutionException, InterruptedException {
-//        completableFutureTest = rewardService.getRewardSummaries();
-//        var summaries =  completableFutureTest.get();
-//        var david = summaries.stream()
-//                .filter(s -> s.getCustomerName().equals("David John"))
-//                .findFirst()
-//                .orElseThrow();
-//
-//        assertThat(david.getTotalPoints()).isZero();
-//    }
-//
-//    @Test
-//    void totalPoints_equalsSumOfMonthlyPoints() throws ExecutionException, InterruptedException {
-//        completableFutureTest = rewardService.getRewardSummaries();
-//        var summaries =  completableFutureTest.get();
-//        for (var summary : summaries) {
-//            int sumOfMonths = summary.getMonthlyRewards().stream()
-//                    .mapToInt(m -> m.getPoints())
-//                    .sum();
-//            assertThat(summary.getTotalPoints()).isEqualTo(sumOfMonths);
-//        }
-//    }
-//    @Test
-//    void summary_areReturnedForSingleCustomerInRepository() {
-//
-//        var summary=  rewardService.getRewardSummaryByCustomerId("C001",1);
-//
-//        assertThat(summary.getCustomerId()).isEqualTo("C001");
-//        assertThat(summary.getCustomerName()).isEqualTo("Alice Job");
-//        assertThat(summary.getTotalPoints()).isNotZero();
-//    }
     @Test
-    void summary_illegalArgumentExceptionNullCustomerId() {
-        assertThrows(IllegalArgumentException.class, () -> rewardService.getRewardSummaryByCustomerId(null,1));
+    void summaries_areReturnedForEveryCustomerInRepository() throws ExecutionException, InterruptedException {
+        LocalDate startDate = LocalDate.now().minusMonths(3);
+        LocalDate endDate = LocalDate.now();
+
+        completableFutureTest = CompletableFuture.supplyAsync(() -> rewardService.getRewardSummaries(startDate, endDate));
+//
+        var summaries = completableFutureTest.get();
+
+        assertThat(summaries).hasSize(5);
+        assertThat(summaries).extracting("customerName")
+                .containsExactlyInAnyOrder("Alice Job", "David John", "Nirmal Xavier", "Priya Sharma", "Sonu Venu");
+    }
+
+    //
+    @Test
+    void customerWithOnlySmallPurchases_hasZeroTotalPoints() throws ExecutionException, InterruptedException {
+        LocalDate startDate = LocalDate.now().minusMonths(3);
+        LocalDate endDate = LocalDate.now();
+
+        completableFutureTest = CompletableFuture.supplyAsync(() -> rewardService.getRewardSummaries(startDate, endDate));
+        var summaries = completableFutureTest.get();
+        var david = summaries.stream()
+                .filter(s -> s.customerName().equals("David John"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(david.totalPoints()).isZero();
     }
 
     @Test
-    void summary_illegalArgumentExceptionZeroMonth() {
-        assertThrows(IllegalArgumentException.class, () -> rewardService.getRewardSummaryByCustomerId("C001",0));
+    void totalPoints_equalsSumOfMonthlyPoints() throws ExecutionException, InterruptedException {
+        LocalDate startDate = LocalDate.now().minusMonths(3);
+        LocalDate endDate = LocalDate.now();
+        completableFutureTest = CompletableFuture.supplyAsync(() -> rewardService.getRewardSummaries(startDate, endDate));
+        var summaries = completableFutureTest.get();
+        for (var summary : summaries) {
+            int sumOfMonths = summary.monthlyRewards().stream()
+                    .mapToInt(MonthlyReward::points)
+                    .sum();
+            assertThat(summary.totalPoints()).isEqualTo(sumOfMonths);
+        }
+    }
+
+
+
+    @Test
+    void summmaries_AppExceptionForInvalidDateRange() {
+        LocalDate startDate = LocalDate.now().minusMonths(4);
+        LocalDate endDate = LocalDate.now();
+        LocalDate invalidStartDate = LocalDate.now().minusYears(1).minusMonths(4);
+        LocalDate invalidEndDate = LocalDate.now().minusYears(1).minusMonths(2);
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(startDate, endDate));
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(endDate, startDate));
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(startDate, null));
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(null, endDate));
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(null, null));
+        assertThrows(AppException.class, () -> rewardService.getRewardSummaries(invalidStartDate, invalidEndDate));
     }
 
     @Test
-    void summary_notFoundForNonExistentCustomerId() {
-        assertThrows(CustomerNotFoundException.class, () -> rewardService.getRewardSummaryByCustomerId("C999",2));
+    void summmaries_CustomeNotFoundExceptionForInvalidDateRange() {
+        LocalDate startDate = LocalDate.now().minusMonths(6);
+        LocalDate endDate = LocalDate.now().minusMonths(4);
+
+        assertThrows(CustomerNotFoundException.class, () -> rewardService.getRewardSummaries(startDate, endDate));
+
     }
+
 }

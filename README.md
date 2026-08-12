@@ -17,10 +17,10 @@ mvn spring-boot:run
 Then:
 
 ```bash
-curl http://localhost:8080/api/rewards
+curl localhost:8080/v1/calculateRewards?startDate=2026-05-09&endDate=2026-08-07
 ```
 
-Returns each customer's points broken down by month, plus a running total:
+Returns each customer's points broken down by month, plus a running total: for the date range May 9, 2026 to August 7, 2026:
 
 ```json
 [
@@ -29,14 +29,16 @@ Returns each customer's points broken down by month, plus a running total:
     "customerName": "Alice Job",
     "monthlyRewards": [
       {
-        "month": "2026-05",
-        "points": 50,
+        "year": 2026,
+        "month": "MAY",
+        "points": 25,
         "transactionIds": [
           "T0002"
         ]
       },
       {
-        "month": "2026-06",
+        "year": 2026,
+        "month": "JUNE",
         "points": 250,
         "transactionIds": [
           "T0003",
@@ -44,86 +46,278 @@ Returns each customer's points broken down by month, plus a running total:
         ]
       },
       {
-        "month": "2026-07",
-        "points": 50,
+        "year": 2026,
+        "month": "JULY",
+        "points": 49,
         "transactionIds": [
           "T0005"
         ]
       }
     ],
-    "totalPoints": 350
+    "totalPoints": 324
+  },
+  {
+    "customerId": "C004",
+    "customerName": "David John",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "MAY",
+        "points": 0,
+        "transactionIds": [
+          "T00011"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 0,
+        "transactionIds": [
+          "T00012"
+        ]
+      }
+    ],
+    "totalPoints": 0
+  },
+  {
+    "customerId": "C005",
+    "customerName": "Nirmal Xavier",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 90,
+        "transactionIds": [
+          "T00013"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 10,
+        "transactionIds": [
+          "T00014"
+        ]
+      }
+    ],
+    "totalPoints": 100
+  },
+  {
+    "customerId": "C003",
+    "customerName": "Priya Sharma",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "MAY",
+        "points": 470,
+        "transactionIds": [
+          "T0008"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 370,
+        "transactionIds": [
+          "T0009"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 210,
+        "transactionIds": [
+          "T00010"
+        ]
+      }
+    ],
+    "totalPoints": 1050
+  },
+  {
+    "customerId": "C002",
+    "customerName": "Sonu Venu",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 151,
+        "transactionIds": [
+          "T0007"
+        ]
+      }
+    ],
+    "totalPoints": 151
   }
 ]
 ```
 ```bash
-curl http://localhost:8080/api/C005/rewards
+curl localhost:8080/v1/calculateRewards
 ```
-Returns a single customer's points broken down by month, plus a running total:
+Returns each customer's points broken down by month, plus a running total: for the default date range of the last 3 months:
+
+```json
+[
+  {
+    "customerId": "C001",
+    "customerName": "Alice Job",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "MAY",
+        "points": 25,
+        "transactionIds": [
+          "T0002"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 250,
+        "transactionIds": [
+          "T0003",
+          "T0004"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 49,
+        "transactionIds": [
+          "T0005"
+        ]
+      }
+    ],
+    "totalPoints": 324
+  },
+  {
+    "customerId": "C004",
+    "customerName": "David John",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 0,
+        "transactionIds": [
+          "T00012"
+        ]
+      }
+    ],
+    "totalPoints": 0
+  },
+  {
+    "customerId": "C005",
+    "customerName": "Nirmal Xavier",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 90,
+        "transactionIds": [
+          "T00013"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 10,
+        "transactionIds": [
+          "T00014"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "AUGUST",
+        "points": 2,
+        "transactionIds": [
+          "T00015"
+        ]
+      }
+    ],
+    "totalPoints": 102
+  },
+  {
+    "customerId": "C003",
+    "customerName": "Priya Sharma",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JUNE",
+        "points": 370,
+        "transactionIds": [
+          "T0009"
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 210,
+        "transactionIds": [
+          "T00010"
+        ]
+      }
+    ],
+    "totalPoints": 580
+  },
+  {
+    "customerId": "C002",
+    "customerName": "Sonu Venu",
+    "monthlyRewards": [
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 151,
+        "transactionIds": [
+          "T0007"
+        ]
+      }
+    ],
+    "totalPoints": 151
+  }
+]
+```
+```bash
+curl localhost:8080/v1/calculateRewards?startDate=2026-05-09
+```
+Returns an error because the end date is missing:
 
 ```json
 {
-  "customerId": "C005",
-  "customerName": "Eve Adams",
-  "monthlyRewards": [
-    {
-      "month": "2026-05",
-      "points": 0,
-      "transactionIds": [
-        "T0013"
-      ]
-    },
-    {
-      "month": "2026-06",
-      "points": 0,
-      "transactionIds": [
-        "T0014"
-      ]
-    },
-    {
-      "month": "2026-07",
-      "points": 0,
-      "transactionIds": [
-        "T0015"
-      ]
-    }
-  ],
-  "totalPoints": 0
+  "details": "Both start date and end date must be provided together or both must be null.",
+  "statusCode": 400,
+  "timestamp": "2026-08-12T22:22:47.8882322"
 }
 ```
 ```bash
-curl http://localhost:8080/api/C001/rewards?months=6
+curl localhost:8080/v1/calculateRewards?endDate=2026-08-07
+````
+Returns an error because the end date is missing:
+```json
+{
+  "details": "Both start date and end date must be provided together or both must be null.",
+  "statusCode": 400,
+  "timestamp": "2026-08-12T22:22:47.8882322"
+}
 ```
-Returns a single customer's points for the last 6 months, plus a running total:
+```bash
+curl localhost:8080/v1/calculateRewards?startDate=2026-08-09&endDate=2026-05-07
+```
+Returns an error because the start date is after the end date:
 
 ```json
 {
-  "customerId": "C001",
-  "customerName": "Alice Job",
-  "monthlyRewards": [
-    {
-      "month": "2026-06",
-      "points": 250,
-      "transactionIds": [
-        "T0003",
-        "T0004"
-      ]
-    },
-    {
-      "month": "2026-07",
-      "points": 50,
-      "transactionIds": [
-        "T0005"
-      ]
-    }
-  ],
-  "totalPoints": 300
+  "details": "Start date must be before or equal to end date.",
+  "statusCode": 400,
+  "timestamp": "2026-08-12T22:38:59.1651701"
 }
 ```
+
 ## Test it
 
 ```bash
 mvn test
 ```
+``screnshot
+![img.png](img.png)
 ...
 ## Health check
 
