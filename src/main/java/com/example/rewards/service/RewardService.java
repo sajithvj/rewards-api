@@ -2,11 +2,13 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.dto.MonthlyReward;
+import com.example.rewards.exception.AppException;
 import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.model.Transaction;
 import com.example.rewards.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +58,8 @@ public class RewardService {
         }
 
         if (remaining.compareTo(TIER_1_THRESHOLD) > 0) {
-            BigDecimal fiftyToHundred = BigDecimal.valueOf(50); // 1 point per dollar over $50 up to $100
+
+            BigDecimal fiftyToHundred =  remaining.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
             points = points.add(fiftyToHundred);
         }
 
@@ -67,15 +70,20 @@ public class RewardService {
      * Builds a per-customer summary of reward points, broken down by
      * calendar month, plus the total across all months on record.
      */
-    @Async(value = "asyncTaskExecutor")
-    public CompletableFuture<List<CustomerRewardSummary>> getRewardSummaries() {
-        Map<String, List<Transaction>> byCustomer = transactionRepository.findAll().stream()
+
+    public List<CustomerRewardSummary> getRewardSummaries(LocalDate startDate, LocalDate endDate) {
+
+        Map<String, List<Transaction>> byCustomer = transactionRepository.findByTransactionDateBetween(startDate, endDate).stream()
                 .collect(Collectors.groupingBy(Transaction::customerId));
         List<CustomerRewardSummary> summaries = byCustomer.entrySet().stream()
                 .map(entry -> buildSummary(entry.getKey(), entry.getValue()))
-                .sorted(Comparator.comparing(CustomerRewardSummary::getCustomerName))
+                .sorted(Comparator.comparing(CustomerRewardSummary::customerName))
                 .collect(Collectors.toList());
-        return CompletableFuture.completedFuture(summaries);
+        if (summaries.isEmpty()) {
+            log.warn("No transactions found between {} and {}", startDate, endDate);
+            throw new AppException("No transactions found in the specified date range.", HttpStatus.NOT_FOUND);
+        }
+        return summaries;
     }
 
     /**
@@ -113,10 +121,10 @@ public class RewardService {
 
 
         List<MonthlyReward> monthlyRewards = pointsByMonth.entrySet().stream()
-                .map(e -> new MonthlyReward(e.getKey(), e.getValue(), transactionByMonth.get(e.getKey())))
+                .map(e -> new MonthlyReward(e.getKey().getYear(),e.getKey().getMonth().name(), e.getValue(), transactionByMonth.get(e.getKey())))
                 .collect(Collectors.toList());
 
-        int totalPoints = monthlyRewards.stream().mapToInt(MonthlyReward::getPoints).sum();
+        int totalPoints = monthlyRewards.stream().mapToInt(MonthlyReward::points).sum();
 
         return new CustomerRewardSummary(customerId, customerName, monthlyRewards, totalPoints);
     }

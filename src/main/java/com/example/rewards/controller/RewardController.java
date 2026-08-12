@@ -4,15 +4,17 @@ import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.service.RewardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/v1")
 
 public class RewardController {
 
@@ -26,23 +28,14 @@ public class RewardController {
     }
 
     /**
-     * GET /api/rewards
+     * GET /vi/calculateRewards
      * Returns, for every customer on record, reward points earned per
      * month plus the total across the whole period.
      */
-    @GetMapping("/rewards")
-    public CompletableFuture<ResponseEntity<List<CustomerRewardSummary>>> getRewards() {
-        return rewardService.getRewardSummaries()
-                .handle((result, ex) -> {
-                    if (ex != null || result == null || result.isEmpty()) {
-                        // Handle the exception and return an appropriate response
-                        log.error("Failed to process order", ex);
-                        throw new RuntimeException("Error occurred while fetching reward summaries", ex);
-                    } else {
-                        return ResponseEntity.ok(result);
-                    }
-                });
-
+    @GetMapping("/calculateRewards")
+    public ResponseEntity<List<CustomerRewardSummary>> getRewards(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate)  {
+        return new ResponseEntity<>(rewardService.getRewardSummaries(startDate,endDate), HttpStatus.OK);
     }
 
     /**

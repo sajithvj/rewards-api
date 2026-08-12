@@ -23,11 +23,11 @@ class RewardControllerIntegrationTest {
         // The controller resolves via CompletableFuture, so the request is
         // processed in two stages under MockMvc: kick off the async
         // dispatch, then assert on the result once it completes.
-        MvcResult asyncResult = mockMvc.perform(get("/api/rewards"))
-                .andExpect(request().asyncStarted())
-                .andReturn();
+//        MvcResult asyncResult = mockMvc.perform(get("/api/rewards"))
+//                .andExpect(request().asyncStarted())
+//                .andReturn();
 
-        mockMvc.perform(asyncDispatch(asyncResult))
+        mockMvc.perform(get("/v1/calculateRewards"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].customerName").exists())
@@ -40,7 +40,7 @@ class RewardControllerIntegrationTest {
     void getRewards_returnOkAndCustomerSummaryWithCustomerId() throws Exception {
         //Checking for a specific customerId, assuming "C001" is a valid customerId in the test database
 
-        mockMvc.perform(get("/api/C001/rewards"))
+        mockMvc.perform(get("/v1/C001/rewards"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customerName").exists())
                 .andExpect(jsonPath("$.totalPoints").exists())

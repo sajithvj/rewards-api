@@ -37,7 +37,8 @@ public class TransactionRepository {
             new Transaction("T00012", "C004", "David John", new BigDecimal("49.99"), LocalDate.of(2026, 6, 30)),
 
             new Transaction("T00013", "C005", "Nirmal Xavier", new BigDecimal("120.00"), LocalDate.of(2026, 6, 9)),
-            new Transaction("T00014", "C005", "Nirmal Xavier", new BigDecimal("60.00"), LocalDate.of(2026, 7, 9))
+            new Transaction("T00014", "C005", "Nirmal Xavier", new BigDecimal("60.00"), LocalDate.of(2026, 7, 9)),
+            new Transaction("T00015", "C005", "Nirmal Xavier", new BigDecimal("52.00"), LocalDate.of(2026, 8, 9))
 
     );
 
@@ -48,6 +49,11 @@ public class TransactionRepository {
     public List<Transaction> findByCustomerIdAndTransactionDateBetween(String customerId, LocalDate startDate, LocalDate endDate) {
         return transactions.stream()
                 .filter(t -> t.customerId().equals(customerId))
+                .filter(t -> !t.transactionDate().isBefore(startDate) && !t.transactionDate().isAfter(endDate))
+                .toList();
+    }
+    public List<Transaction> findByTransactionDateBetween(LocalDate startDate, LocalDate endDate) {
+        return transactions.stream()
                 .filter(t -> !t.transactionDate().isBefore(startDate) && !t.transactionDate().isAfter(endDate))
                 .toList();
     }
