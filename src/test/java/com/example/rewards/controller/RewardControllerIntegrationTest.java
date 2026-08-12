@@ -30,5 +30,44 @@ class RewardControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
     }
 
+    @Test
+    void getRewards_returnsOkAndNonEmptyCustomerListWithProvidedStartDateAndEndDate() throws Exception {
+
+
+        mockMvc.perform(get("/v1/calculateRewards?startDate=2026-05-09&endDate=2026-06-30"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].customerName").exists())
+                .andExpect(jsonPath("$[0].totalPoints").exists())
+                .andExpect(jsonPath("$[0].monthlyRewards").isArray())
+                .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
+    }
+
+    @Test
+    void getRewards_returnsOkAndNonEmptyCustomerListWithProvidedStartDateOnly() throws Exception {
+
+
+        mockMvc.perform(get("/v1/calculateRewards?startDate=2026-06-09"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].customerName").exists())
+                .andExpect(jsonPath("$[0].totalPoints").exists())
+                .andExpect(jsonPath("$[0].monthlyRewards").isArray())
+                .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
+    }
+
+    @Test
+    void getRewards_returnsOkAndNonEmptyCustomerListWithProvidedEndDateOnly() throws Exception {
+
+
+        mockMvc.perform(get("/v1/calculateRewards?endDate=2026-06-09"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].customerName").exists())
+                .andExpect(jsonPath("$[0].totalPoints").exists())
+                .andExpect(jsonPath("$[0].monthlyRewards").isArray())
+                .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
+    }
+
 
 }

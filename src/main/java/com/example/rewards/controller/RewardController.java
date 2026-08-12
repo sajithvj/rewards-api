@@ -23,7 +23,8 @@ public class RewardController {
     private final RewardService rewardService;
 
     private static final Logger log = LoggerFactory.getLogger(RewardController.class);
-
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public RewardController(RewardService rewardService) {
         this.rewardService = rewardService;
@@ -35,20 +36,28 @@ public class RewardController {
      * month plus the total across the whole period.
      */
     @GetMapping("/calculateRewards")
-    public ResponseEntity<List<CustomerRewardSummary>> getRewards(@RequestParam(required = false, name = "startDate") String startDateStr,
-                                                                  @RequestParam(required = false, name = "endDate") String endDateStr) {
-        LocalDate startDate;
-        LocalDate endDate;
-        startDate = DateParameterParser.parse("startDate", startDateStr);
-        endDate = DateParameterParser.parse("endDate", endDateStr);
-        if (startDate == null && endDate == null) {
-
-            startDate = LocalDate.now().minusMonths(3);
-            endDate = LocalDate.now();
-        }
+    public ResponseEntity<List<CustomerRewardSummary>> getRewards(@RequestParam(required = false, name = "startDate") String startDateStr, @RequestParam(required = false, name = "endDate") String endDateStr) {
+        validateDateRange(startDateStr, endDateStr);
 
         return new ResponseEntity<>(rewardService.getRewardSummaries(startDate, endDate), HttpStatus.OK);
     }
 
+    private void validateDateRange(String startDateStr, String endDateStr) {
+        if ((startDateStr==null||startDateStr.isEmpty())&& (endDateStr==null||endDateStr.isEmpty())) {
+            startDate = LocalDate.now().minusMonths(3);
+            endDate = LocalDate.now();
+        } else if (startDateStr==null||startDateStr.isEmpty()) {
+            startDate = LocalDate.now().minusMonths(3);
+            endDate = DateParameterParser.parse("endDate", endDateStr);
+        } else if (endDateStr==null||endDateStr.isEmpty()) {
+            startDate = DateParameterParser.parse("startDate", startDateStr);
+            endDate = LocalDate.now();
+        } else {
+            startDate = DateParameterParser.parse("startDate", startDateStr);
+            endDate = DateParameterParser.parse("endDate", endDateStr);
+        }
+
+
+    }
 
 }

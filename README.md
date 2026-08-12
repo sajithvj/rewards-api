@@ -323,7 +323,7 @@ Returns an error because the start date is after the end date:
 mvn test
 ```
 ``screnshot
-![img.png](img.png)
+![img_1.png](img_1.png)
 ...
 ## Health check
 
