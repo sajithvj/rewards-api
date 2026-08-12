@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @SpringBootTest
 class RewardServiceTest {
 
@@ -76,7 +77,7 @@ class RewardServiceTest {
         LocalDate endDate = LocalDate.now();
 
         completableFutureTest = CompletableFuture.supplyAsync(() -> rewardService.getRewardSummaries(startDate, endDate));
-//
+
         var summaries = completableFutureTest.get();
 
         assertThat(summaries).hasSize(5);
@@ -113,7 +114,6 @@ class RewardServiceTest {
             assertThat(summary.totalPoints()).isEqualTo(sumOfMonths);
         }
     }
-
 
 
     @Test

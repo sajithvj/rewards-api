@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -50,14 +51,16 @@ public class RewardService {
         BigDecimal points = BigDecimal.ZERO;
 
         if (remaining.compareTo(TIER_2_THRESHOLD) > 0) {
+
             BigDecimal overHundred = remaining.subtract(TIER_2_THRESHOLD);
             points = points.add(overHundred.multiply(BigDecimal.valueOf(2)));
             remaining = TIER_2_THRESHOLD;
         }
 
         if (remaining.compareTo(TIER_1_THRESHOLD) > 0) {
-            BigDecimal fiftyToHundred = remaining.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
-            points = points.add(fiftyToHundred);
+            BigDecimal applicableAmount = remaining.min(TIER_2_THRESHOLD);
+            BigDecimal fiftyToHundred = applicableAmount.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
+            points = points.add(fiftyToHundred.setScale(0, RoundingMode.HALF_UP)); // Truncate fractional dollars
         }
 
         return points.intValue();
@@ -78,7 +81,7 @@ public class RewardService {
                 .collect(Collectors.toList());
         if (summaries.isEmpty()) {
             log.warn("No transactions found between {} and {}", startDate, endDate);
-            throw new CustomerNotFoundException(startDate,endDate);
+            throw new CustomerNotFoundException(startDate, endDate);
         }
         return summaries;
     }

@@ -5,10 +5,12 @@ import com.example.rewards.service.RewardService;
 import com.example.rewards.util.DateParameterParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,12 +35,12 @@ public class RewardController {
      * month plus the total across the whole period.
      */
     @GetMapping("/calculateRewards")
-    public ResponseEntity<List<CustomerRewardSummary>> getRewards(@RequestParam(required = false,name = "startDate") String startDateStr,
-                                                                  @RequestParam(required = false,name = "endDate") String endDateStr) {
+    public ResponseEntity<List<CustomerRewardSummary>> getRewards(@RequestParam(required = false, name = "startDate") String startDateStr,
+                                                                  @RequestParam(required = false, name = "endDate") String endDateStr) {
         LocalDate startDate;
         LocalDate endDate;
-        startDate= DateParameterParser.parse("startDate", startDateStr);
-        endDate=DateParameterParser.parse("endDate", endDateStr);
+        startDate = DateParameterParser.parse("startDate", startDateStr);
+        endDate = DateParameterParser.parse("endDate", endDateStr);
         if (startDate == null && endDate == null) {
 
             startDate = LocalDate.now().minusMonths(3);
@@ -47,8 +49,6 @@ public class RewardController {
 
         return new ResponseEntity<>(rewardService.getRewardSummaries(startDate, endDate), HttpStatus.OK);
     }
-
-
 
 
 }
