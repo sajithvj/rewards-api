@@ -12,12 +12,12 @@ import java.util.List;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorResponse> handleException(AppException ex, WebRequest req) {
+    @ExceptionHandler(DateRangeException.class)
+    public ResponseEntity<ErrorResponse> handleException(DateRangeException ex, WebRequest req) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
-        ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(), ex.getErrCode().value(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, ex.getErrCode());
+        ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(), HttpStatus.BAD_REQUEST.value(), req.getContextPath(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
-                500, LocalDateTime.now());
+                500, req.getContextPath(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 
 
@@ -36,7 +36,16 @@ public class GlobalExceptionHandler {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
-                404, LocalDateTime.now());
+                404, req.getContextPath(),LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(InvalidDateFormatException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidDateFormat(InvalidDateFormatException ex,
+                                                                 WebRequest req) {
+        List<String> details = new ArrayList<>();
+        details.add(ex.getLocalizedMessage());
+        ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
+                404, req.getContextPath(),LocalDateTime.now());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

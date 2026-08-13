@@ -1,6 +1,5 @@
 package com.example.rewards.dto;
 
-import java.time.Month;
 import java.util.List;
 
 /**

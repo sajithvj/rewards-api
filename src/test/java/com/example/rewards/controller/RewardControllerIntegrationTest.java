@@ -44,29 +44,34 @@ class RewardControllerIntegrationTest {
     }
 
     @Test
-    void getRewards_returnsOkAndNonEmptyCustomerListWithProvidedStartDateOnly() throws Exception {
+    void getRewards_returns404ErrorWithProvidedStartDateOnly() throws Exception {
 
 
         mockMvc.perform(get("/v1/calculateRewards?startDate=2026-06-09"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].customerName").exists())
-                .andExpect(jsonPath("$[0].totalPoints").exists())
-                .andExpect(jsonPath("$[0].monthlyRewards").isArray())
-                .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details").exists())
+                .andExpect(jsonPath("$.statusCode").exists());
     }
 
     @Test
-    void getRewards_returnsOkAndNonEmptyCustomerListWithProvidedEndDateOnly() throws Exception {
+    void getRewards_returns404ErrorWithProvidedWithProvidedEndDateOnly() throws Exception {
 
 
         mockMvc.perform(get("/v1/calculateRewards?endDate=2026-06-09"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].customerName").exists())
-                .andExpect(jsonPath("$[0].totalPoints").exists())
-                .andExpect(jsonPath("$[0].monthlyRewards").isArray())
-                .andExpect(jsonPath("$[0].monthlyRewards[0].transactionIds").isArray());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details").exists())
+                .andExpect(jsonPath("$.statusCode").exists());
+
+    }
+
+    @Test
+    void getRewards_returns404ErrorWithProvidedWithInvalidDateFormat() throws Exception {
+
+        mockMvc.perform(get("/v1/calculateRewards?startDate=09-05-2026&endDate=2026-06-30"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details").exists())
+                .andExpect(jsonPath("$.statusCode").exists());
+
     }
 
 

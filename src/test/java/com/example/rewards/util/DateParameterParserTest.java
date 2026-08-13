@@ -1,16 +1,16 @@
 package com.example.rewards.util;
 
-import com.example.rewards.exception.AppException;
+import com.example.rewards.exception.InvalidDateFormatException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@SpringBootTest
 public class DateParameterParserTest {
 
 
@@ -36,14 +36,15 @@ public class DateParameterParserTest {
     @ParameterizedTest
     @ValueSource(strings = {"15-05-2026", "2026/05/15", "2026-05-32", "abc", "2026-5-15"})
     void parse_InvalidFormats_ThrowsAppException(String invalidInput) {
-        AppException exception = assertThrows(AppException.class, () ->
+        InvalidDateFormatException exception = assertThrows(InvalidDateFormatException.class, () ->
                 DateParameterParser.parse("testParam", invalidInput)
         );
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getErrCode());
-        assertTrue(exception.getMessage().contains("Invalid date format for parameter 'testParam'"));
-        assertTrue(exception.getMessage().contains(invalidInput));
-        assertNotNull(exception.getCause());
+
+        assertTrue(exception.getMessage().contains("Invalid value for parameter"));
+        assertTrue(exception.getMessage().contains("testParam"));
+        assertTrue(exception.getMessage().contains( invalidInput));
+;
     }
 
 

@@ -2,23 +2,19 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.dto.MonthlyReward;
-import com.example.rewards.exception.AppException;
 import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.model.Transaction;
 import com.example.rewards.repository.TransactionRepository;
+import com.example.rewards.validation.DateRange;
+import com.example.rewards.validation.DateRangeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,9 +24,11 @@ public class RewardService {
     private static final BigDecimal TIER_1_THRESHOLD = new BigDecimal("50");
 
     private final TransactionRepository transactionRepository;
+    private final DateRangeValidator dateRangeValidator;
 
-    public RewardService(TransactionRepository transactionRepository) {
+    public RewardService(TransactionRepository transactionRepository,DateRangeValidator dateRangeValidator) {
         this.transactionRepository = transactionRepository;
+        this.dateRangeValidator=dateRangeValidator;
     }
 
     /**
@@ -53,14 +51,14 @@ public class RewardService {
         if (remaining.compareTo(TIER_2_THRESHOLD) > 0) {
 
             BigDecimal overHundred = remaining.subtract(TIER_2_THRESHOLD);
-            points = points.add(overHundred.multiply(BigDecimal.valueOf(2)));
+            points = points.add(overHundred.setScale(0,RoundingMode.FLOOR).multiply(BigDecimal.valueOf(2)));
             remaining = TIER_2_THRESHOLD;
         }
 
         if (remaining.compareTo(TIER_1_THRESHOLD) > 0) {
             BigDecimal applicableAmount = remaining.min(TIER_2_THRESHOLD);
             BigDecimal fiftyToHundred = applicableAmount.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
-            points = points.add(fiftyToHundred.setScale(0, RoundingMode.HALF_UP)); // Truncate fractional dollars
+            points = points.add(fiftyToHundred.setScale(0, RoundingMode.FLOOR)); // Truncate fractional dollars
         }
 
         return points.intValue();
@@ -71,78 +69,46 @@ public class RewardService {
      * calendar month, plus the total across all months on record.
      */
 
-    public List<CustomerRewardSummary> getRewardSummaries(LocalDate startDate, LocalDate endDate) {
-        validateDateRange(startDate, endDate);
-        Map<String, List<Transaction>> byCustomer = transactionRepository.findByTransactionDateBetween(startDate, endDate).stream()
+    public List<CustomerRewardSummary> getRewardSummaries(String startDateStr, String endDateStr) {
+
+        DateRange dateRange = dateRangeValidator.validateDateRange(startDateStr,endDateStr);
+        Map<String, List<Transaction>> byCustomer = transactionRepository.findByTransactionDateBetween(dateRange.startDate(), dateRange.endDate()).stream()
                 .collect(Collectors.groupingBy(Transaction::customerId));
         List<CustomerRewardSummary> summaries = byCustomer.entrySet().stream()
                 .map(entry -> buildSummary(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparing(CustomerRewardSummary::customerName))
                 .collect(Collectors.toList());
         if (summaries.isEmpty()) {
-            log.warn("No transactions found between {} and {}", startDate, endDate);
-            throw new CustomerNotFoundException(startDate, endDate);
+            log.warn("No transactions found between {} and {}", dateRange.startDate(), dateRange.endDate());
+            throw new CustomerNotFoundException(dateRange.startDate(), dateRange.endDate());
         }
         return summaries;
     }
 
 
     private CustomerRewardSummary buildSummary(String customerId, List<Transaction> customerTransactions) {
-        String customerName = customerTransactions.get(0).customerName();
+        String customerName = customerTransactions.stream().findFirst().orElseThrow(NullPointerException::new).customerName();
 
         // TreeMap keeps months in chronological order in the response.
         Map<YearMonth, Integer> pointsByMonth = new TreeMap<>();
         Map<YearMonth, List<String>> transactionByMonth = new TreeMap<>();
-        for (Transaction t : customerTransactions) {
-            YearMonth month = YearMonth.from(t.transactionDate());
-            int points = calculatePoints(t.amount());
-            pointsByMonth.merge(month, points, Integer::sum);
-            transactionByMonth.computeIfAbsent(month, k -> new java.util.ArrayList<>()).add(t.transactionId());
-        }
+        customerTransactions.forEach(t->{
+            YearMonth month=YearMonth.from(t.transactionDate());
+            int points =calculatePoints(t.amount());
+            pointsByMonth.merge(month,points,Integer::sum);
+            transactionByMonth.computeIfAbsent(month,k-> new ArrayList<>()).add(t.transactionId());
+        });
+
 
 
         List<MonthlyReward> monthlyRewards = pointsByMonth.entrySet().stream()
                 .map(e -> new MonthlyReward(e.getKey().getYear(), e.getKey().getMonth().name(), e.getValue(), transactionByMonth.get(e.getKey())))
-                .collect(Collectors.toList());
+                .toList();
 
         int totalPoints = monthlyRewards.stream().mapToInt(MonthlyReward::points).sum();
 
         return new CustomerRewardSummary(customerId, customerName, monthlyRewards, totalPoints);
     }
 
-    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
-        // 1. Check for mutual presence/absence
-        if ((startDate == null) != (endDate == null)) {
-            log.error("Exclusive null dates provided: startDate={}, endDate={}", startDate, endDate);
-            throw new AppException("Both start date and end date must be provided together or both must be null.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 2. Early exit if both are null (valid state)
-        if (startDate == null && endDate == null) {
-            log.error("Both startDate and endDate are null, which is not allowed.");
-            throw new AppException("Both start date and end date cannot be null.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 3. Chronological order check
-        if (startDate.isAfter(endDate)) {
-            log.error("Invalid sequence: startDate {} is after endDate {}", startDate, endDate);
-            throw new AppException("Start date must be before or equal to end date.", HttpStatus.BAD_REQUEST);
-        }
-
-
-        // 4. One-year historical limit check (cache LocalDate.now() execution)
-        LocalDate minAllowedStartDate = LocalDate.now().minusYears(1);
-        if (startDate.isBefore(minAllowedStartDate)) {
-            log.error("Start date {} exceeds 1-year historical limit.", startDate);
-            throw new AppException("Start date cannot be more than one year in the past.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 5. Maximum range window check (exact 3-month bound evaluation)
-        if (startDate.plusMonths(3).isBefore(endDate)) {
-            log.error("Date span exceeds 3 months: startDate={}, endDate={}", startDate, endDate);
-            throw new AppException("Date range cannot exceed three months.", HttpStatus.BAD_REQUEST);
-        }
-
-    }
 
 }

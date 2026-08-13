@@ -487,7 +487,7 @@ Returns an error because the start date is after the end date:
 mvn test
 ```
 ``screnshots
-![img_1.png](img_1.png)
+![doc/img_1.jpg](\doc\img_1.jpg)
 
 ![img.png](img.png)
 
@@ -495,9 +495,6 @@ mvn test
 
 ![img_3.png](img_3.png)
 
-![img_4.png](img_4.png)
-
-![img_5.png](img_5.png)
 ...
 ## Health check
 
