@@ -10,8 +10,7 @@ Calculates customer reward points from retail transactions.
   - a $50 purchase = 0 points
   - a $75 purchase = 25 points
   - a $200 purchase = 2×$100 + 1×$50 = 250 points
-  - a $100.5 purchase = 2×$0.5 + 1×$50 = 51 points
-  - a $51.99 purchase = 2 points
+  - a $51 purchase = 1 point
   - a $100 purchase = 50 points
 
 ## Run it
