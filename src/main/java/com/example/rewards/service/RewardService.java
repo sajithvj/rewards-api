@@ -77,7 +77,7 @@ public class RewardService {
         List<CustomerRewardSummary> summaries = byCustomer.entrySet().stream()
                 .map(entry -> buildSummary(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparing(CustomerRewardSummary::customerName))
-                .collect(Collectors.toList());
+                .toList();
         if (summaries.isEmpty()) {
             log.warn("No transactions found between {} and {}", dateRange.startDate(), dateRange.endDate());
             throw new CustomerNotFoundException(dateRange.startDate(), dateRange.endDate());
