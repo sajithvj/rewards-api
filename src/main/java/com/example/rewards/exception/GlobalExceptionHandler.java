@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(), HttpStatus.BAD_REQUEST.value(), request.getRequestURI(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
@@ -37,16 +37,17 @@ public class GlobalExceptionHandler {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
-                404, req.getRequestURI(),LocalDateTime.now());
+                404, req.getRequestURI(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(InvalidDateFormatException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDateFormat(InvalidDateFormatException ex,
-                                                                 HttpServletRequest  req) {
+                                                                 HttpServletRequest req) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ErrorResponse errorResponse = new ErrorResponse(details.stream().iterator().next(),
-                404, req.getRequestURI(),LocalDateTime.now());
+                404, req.getRequestURI(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
