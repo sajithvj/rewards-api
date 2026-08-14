@@ -337,11 +337,17 @@ mvn test
 ``screnshots
 ![img_1.jpg](doc/img_1.jpg)
 
+![img_5.jpg](doc/img_5.jpg)
+
+![img_6.jpg](doc/img_6.jpg)
+
 ![img_2.jpg](doc/img_2.jpg)
 
 ![img_3.jpg](doc/img_3.jpg)
 
 ![img_4.jpg](doc/img_4.jpg)
+
+![img_7.jpg](doc/img_7.jpg)
 
 ...
 ## Health check
