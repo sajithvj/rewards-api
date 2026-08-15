@@ -449,7 +449,7 @@ example from the spec ($120 → 90 pts), a customer who never crosses $50
 - **`RewardService.calculatePoints`** is a small pure function — easy to
   unit test in isolation from HTTP/aggregation concerns.
 - **`BigDecimal`** is used throughout for money instead of `double`, to
-  avoid floating-point rounding errors on currency.
+  avoid floating-point rounding errors on currency and truncated decimal points for accuracy.
 - Transactions are seeded in-memory (`TransactionRepository`) rather than
   backed by a real database, since the assignment calls for a made-up
   data set . Swapping in a JPA repository later
