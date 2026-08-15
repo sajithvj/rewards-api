@@ -45,20 +45,20 @@ public class RewardService {
             return 0;
         }
 
-        BigDecimal remaining = amount;
+        BigDecimal remaining = amount.setScale(0,RoundingMode.FLOOR); // Truncate fractional dollars
         BigDecimal points = BigDecimal.ZERO;
 
         if (remaining.compareTo(TIER_2_THRESHOLD) > 0) {
 
             BigDecimal overHundred = remaining.subtract(TIER_2_THRESHOLD);
-            points = points.add(overHundred.setScale(0,RoundingMode.FLOOR).multiply(BigDecimal.valueOf(2)));
+            points = points.add(overHundred.multiply(BigDecimal.valueOf(2)));
             remaining = TIER_2_THRESHOLD;
         }
 
         if (remaining.compareTo(TIER_1_THRESHOLD) > 0) {
             BigDecimal applicableAmount = remaining.min(TIER_2_THRESHOLD);
             BigDecimal fiftyToHundred = applicableAmount.subtract(TIER_1_THRESHOLD); // 1 point per dollar over $50 up to $100
-            points = points.add(fiftyToHundred.setScale(0, RoundingMode.FLOOR)); // Truncate fractional dollars
+            points = points.add(fiftyToHundred);
         }
 
         return points.intValue();
