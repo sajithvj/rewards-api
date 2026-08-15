@@ -35,19 +35,25 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "MAY",
-        "points": 25,
-        "transactionIds": [
-          "T0002"
-        ]
-      },
-      {
-        "year": 2026,
         "month": "JUNE",
-        "points": 250,
+        "points": 365,
         "transactionIds": [
-          "T0003",
-          "T0004"
+          {
+            "transactionId": "T0001",
+            "amount": 120.00
+          },
+          {
+            "transactionId": "T0002",
+            "amount": 75.50
+          },
+          {
+            "transactionId": "T0003",
+            "amount": 45.00
+          },
+          {
+            "transactionId": "T0004",
+            "amount": 200.00
+          }
         ]
       },
       {
@@ -55,11 +61,14 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 49,
         "transactionIds": [
-          "T0005"
+          {
+            "transactionId": "T0005",
+            "amount": 99.99
+          }
         ]
       }
     ],
-    "totalPoints": 324
+    "totalPoints": 414
   },
   {
     "customerId": "C004",
@@ -67,18 +76,17 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "MAY",
-        "points": 0,
-        "transactionIds": [
-          "T00011"
-        ]
-      },
-      {
-        "year": 2026,
         "month": "JUNE",
         "points": 0,
         "transactionIds": [
-          "T00012"
+          {
+            "transactionId": "T00011",
+            "amount": 30.00
+          },
+          {
+            "transactionId": "T00012",
+            "amount": 49.99
+          }
         ]
       }
     ],
@@ -93,7 +101,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JUNE",
         "points": 90,
         "transactionIds": [
-          "T00013"
+          {
+            "transactionId": "T00013",
+            "amount": 120.00
+          }
         ]
       },
       {
@@ -101,7 +112,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 10,
         "transactionIds": [
-          "T00014"
+          {
+            "transactionId": "T00014",
+            "amount": 60.00
+          }
         ]
       }
     ],
@@ -113,18 +127,17 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "MAY",
-        "points": 470,
-        "transactionIds": [
-          "T0008"
-        ]
-      },
-      {
-        "year": 2026,
         "month": "JUNE",
-        "points": 370,
+        "points": 840,
         "transactionIds": [
-          "T0009"
+          {
+            "transactionId": "T0008",
+            "amount": 310.00
+          },
+          {
+            "transactionId": "T0009",
+            "amount": 260.40
+          }
         ]
       },
       {
@@ -132,7 +145,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 210,
         "transactionIds": [
-          "T00010"
+          {
+            "transactionId": "T00010",
+            "amount": 180.00
+          }
         ]
       }
     ],
@@ -144,14 +160,28 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "JULY",
-        "points": 151,
+        "month": "JUNE",
+        "points": 0,
         "transactionIds": [
-          "T0007"
+          {
+            "transactionId": "T0006",
+            "amount": 50.00
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 150,
+        "transactionIds": [
+          {
+            "transactionId": "T0007",
+            "amount": 150.75
+          }
         ]
       }
     ],
-    "totalPoints": 151
+    "totalPoints": 150
   }
 ]
 ```
@@ -168,19 +198,25 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "MAY",
-        "points": 25,
-        "transactionIds": [
-          "T0002"
-        ]
-      },
-      {
-        "year": 2026,
         "month": "JUNE",
-        "points": 250,
+        "points": 365,
         "transactionIds": [
-          "T0003",
-          "T0004"
+          {
+            "transactionId": "T0001",
+            "amount": 120.00
+          },
+          {
+            "transactionId": "T0002",
+            "amount": 75.50
+          },
+          {
+            "transactionId": "T0003",
+            "amount": 45.00
+          },
+          {
+            "transactionId": "T0004",
+            "amount": 200.00
+          }
         ]
       },
       {
@@ -188,11 +224,14 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 49,
         "transactionIds": [
-          "T0005"
+          {
+            "transactionId": "T0005",
+            "amount": 99.99
+          }
         ]
       }
     ],
-    "totalPoints": 324
+    "totalPoints": 414
   },
   {
     "customerId": "C004",
@@ -203,7 +242,14 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JUNE",
         "points": 0,
         "transactionIds": [
-          "T00012"
+          {
+            "transactionId": "T00011",
+            "amount": 30.00
+          },
+          {
+            "transactionId": "T00012",
+            "amount": 49.99
+          }
         ]
       }
     ],
@@ -218,7 +264,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JUNE",
         "points": 90,
         "transactionIds": [
-          "T00013"
+          {
+            "transactionId": "T00013",
+            "amount": 120.00
+          }
         ]
       },
       {
@@ -226,7 +275,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 10,
         "transactionIds": [
-          "T00014"
+          {
+            "transactionId": "T00014",
+            "amount": 60.00
+          }
         ]
       },
       {
@@ -234,7 +286,10 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "AUGUST",
         "points": 2,
         "transactionIds": [
-          "T00015"
+          {
+            "transactionId": "T00015",
+            "amount": 52.00
+          }
         ]
       }
     ],
@@ -247,9 +302,16 @@ Returns each customer's points broken down by month, plus a running total: for t
       {
         "year": 2026,
         "month": "JUNE",
-        "points": 370,
+        "points": 840,
         "transactionIds": [
-          "T0009"
+          {
+            "transactionId": "T0008",
+            "amount": 310.00
+          },
+          {
+            "transactionId": "T0009",
+            "amount": 260.40
+          }
         ]
       },
       {
@@ -257,11 +319,14 @@ Returns each customer's points broken down by month, plus a running total: for t
         "month": "JULY",
         "points": 210,
         "transactionIds": [
-          "T00010"
+          {
+            "transactionId": "T00010",
+            "amount": 180.00
+          }
         ]
       }
     ],
-    "totalPoints": 580
+    "totalPoints": 1050
   },
   {
     "customerId": "C002",
@@ -269,14 +334,28 @@ Returns each customer's points broken down by month, plus a running total: for t
     "monthlyRewards": [
       {
         "year": 2026,
-        "month": "JULY",
-        "points": 151,
+        "month": "JUNE",
+        "points": 0,
         "transactionIds": [
-          "T0007"
+          {
+            "transactionId": "T0006",
+            "amount": 50.00
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "month": "JULY",
+        "points": 150,
+        "transactionIds": [
+          {
+            "transactionId": "T0007",
+            "amount": 150.75
+          }
         ]
       }
     ],
-    "totalPoints": 151
+    "totalPoints": 150
   }
 ]
 ```

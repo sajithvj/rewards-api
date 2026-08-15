@@ -2,6 +2,7 @@ package com.example.rewards.service;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.dto.MonthlyReward;
+import com.example.rewards.dto.MonthlyTransaction;
 import com.example.rewards.exception.CustomerNotFoundException;
 import com.example.rewards.model.Transaction;
 import com.example.rewards.repository.TransactionRepository;
@@ -91,12 +92,14 @@ public class RewardService {
 
         // TreeMap keeps months in chronological order in the response.
         Map<YearMonth, Integer> pointsByMonth = new TreeMap<>();
-        Map<YearMonth, List<String>> transactionByMonth = new TreeMap<>();
+        Map<YearMonth, List<MonthlyTransaction>> transactionByMonth = new TreeMap<>();
+
         customerTransactions.forEach(t->{
             YearMonth month=YearMonth.from(t.transactionDate());
             int points =calculatePoints(t.amount());
             pointsByMonth.merge(month,points,Integer::sum);
-            transactionByMonth.computeIfAbsent(month,k-> new ArrayList<>()).add(t.transactionId());
+            MonthlyTransaction monthlyTransaction= new MonthlyTransaction(t.transactionId(),t.amount());
+            transactionByMonth.computeIfAbsent(month,k-> new ArrayList<>()).add(monthlyTransaction);
         });
 
 

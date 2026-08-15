@@ -2,6 +2,7 @@ package com.example.rewards.controller;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.dto.MonthlyReward;
+import com.example.rewards.dto.MonthlyTransaction;
 import com.example.rewards.exception.DateRangeException;
 import com.example.rewards.exception.InvalidDateFormatException;
 import com.example.rewards.service.RewardService;
@@ -11,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -94,7 +96,7 @@ class RewardControllerTest {
 
 
     private static CustomerRewardSummary sampleSummary() {
-        MonthlyReward april = new MonthlyReward(2026, "AUG", 115, List.of("T0001", "T0002"));
+        MonthlyReward april = new MonthlyReward(2026, "AUG", 115, List.of(new MonthlyTransaction("110",new BigDecimal(100))));
         return new CustomerRewardSummary("C001", "Alice Nguyen", List.of(april), 115);
     }
 
