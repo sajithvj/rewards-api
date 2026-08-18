@@ -2,8 +2,6 @@ package com.example.rewards.controller;
 
 import com.example.rewards.dto.CustomerRewardSummary;
 import com.example.rewards.service.RewardService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +17,6 @@ import java.util.List;
 public class RewardController {
 
     private final RewardService rewardService;
-
-    private static final Logger log = LoggerFactory.getLogger(RewardController.class);
 
 
     public RewardController(RewardService rewardService) {
